@@ -4,6 +4,7 @@ PromptMask - Video Segmentation Application
 Main Gradio application integrating SAM 3 model with full video processing pipeline.
 """
 
+import os
 import gradio as gr
 import numpy as np
 from PIL import Image
@@ -65,6 +66,25 @@ class PromptMaskApp:
             Status message
         """
         try:
+            # Check for .env file first
+            if not os.path.exists('.env'):
+                return (
+                    "❌ Missing .env file\n\n"
+                    "Please create a .env file with your HuggingFace token:\n"
+                    "1. Create file named .env in the project folder\n"
+                    "2. Add this line: HUGGINGFACE_TOKEN=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\n\n"
+                    "See MIKE_START_HERE.md Step 4 for detailed instructions."
+                )
+            
+            # Check if token exists
+            if not os.getenv('HUGGINGFACE_TOKEN'):
+                return (
+                    "❌ Missing HuggingFace token in .env file\n\n"
+                    "Please add this line to your .env file:\n"
+                    "HUGGINGFACE_TOKEN=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\n\n"
+                    "See MIKE_START_HERE.md Step 4 for detailed instructions."
+                )
+            
             logger.info("Loading SAM 3 model...")
             model, processor = self.model_loader.load_model()
             self.inference_engine = SAM3Inference(self.model_loader)
@@ -73,9 +93,9 @@ class PromptMaskApp:
             return f"✅ Model loaded successfully on {self.model_loader.device}"
 
         except ValueError as e:
-            return f"❌ Authentication Error: {str(e)}"
+            return f"❌ Authentication Error:\n{str(e)}"
         except Exception as e:
-            return f"❌ Error loading model: {str(e)}"
+            return f"❌ Error loading model:\n{str(e)}"
 
     def process_video(
         self,
@@ -394,7 +414,7 @@ def create_ui(app: PromptMaskApp) -> gr.Blocks:
         gr.Markdown("""
         ### 📋 Notes
         - First run will download the SAM 3 model (~2GB)
-        - HuggingFace authentication required (see INSTALLATION.md)
+        - Create .env file with token (see MIKE_START_HERE.md)
         - Supports MP4, AVI, MOV, MKV, WebM formats
         - Maximum 300 frames per video
         - Processing time depends on video length and hardware
