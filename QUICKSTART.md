@@ -1,16 +1,16 @@
 # PromptMask Quick Start Guide
 
-**Status:** Pre-Development  
-**Ready to code:** Once SAM 3 access approved
+**Status:** In Development
+**Ready to code:** Yes - SAM 3 access secured
 
 ## For Sean (Developer)
 
 ### Immediate Next Steps
 
-1. **Request SAM 3 Access** (if not done)
-   - Visit: https://huggingface.co/facebook/sam3
-   - Click "Request Access"
-   - Wait ~24 hours for approval
+1. **Authenticate with HuggingFace**
+   - Get your HuggingFace token (you already have SAM 3 access)
+   - Run: `huggingface-cli login`
+   - Paste your token when prompted
 
 2. **Set Up Development Environment**
    ```bash

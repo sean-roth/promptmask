@@ -90,8 +90,12 @@ class SAM3ModelLoader:
         except OSError as e:
             if "401" in str(e) or "authentication" in str(e).lower():
                 raise ValueError(
-                    "HuggingFace authentication required. Please run:\n"
-                    "  huggingface-cli login\n"
+                    "❌ Authentication Issue:\n"
+                    "1. Make sure you have Sean's HuggingFace token (starts with 'hf_')\n"
+                    "2. Run: huggingface-cli login\n"
+                    "3. Paste the token when prompted\n"
+                    "4. Restart the application\n\n"
+                    "If the error persists, check your internet connection.\n"
                     "See INSTALLATION.md for details."
                 ) from e
             raise RuntimeError(f"Failed to load model: {e}") from e

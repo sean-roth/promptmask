@@ -73,11 +73,26 @@ pip install -r requirements.txt
 
 ### Step 4: Authenticate with HuggingFace
 
-Sean needs to give you his HuggingFace token. Once you have it:
+Sean has already secured access to SAM 3. He will provide you with a HuggingFace token.
+
+#### Getting Sean's HuggingFace Token
+
+**What the token looks like:**
+- Starts with "hf_"
+- About 40 characters long
+- Keep it secret (like a password)
+
+**How to use it:**
+1. Ask Sean: "Can I get the HuggingFace token?"
+2. Copy the token he sends you
+3. Run: `huggingface-cli login`
+4. Paste the token when prompted
+5. Press Enter
+6. You'll see "Login successful"
 
 ```bash
-# Install CLI
-pip install huggingface-cli
+# Install CLI (if needed, should be in requirements.txt)
+pip install huggingface-hub
 
 # Login (paste Sean's token when asked)
 huggingface-cli login
@@ -176,10 +191,20 @@ After processing:
 - Click the "Load SAM 3 Model" button first
 - Wait for it to say "Model loaded successfully"
 
-### "Authentication failed"
-- Make sure you ran `huggingface-cli login`
-- Ask Sean for his HuggingFace token
-- Re-run the login command
+### "Authentication failed" or "401 Unauthorized"
+
+This means the HuggingFace token isn't working.
+
+**Solution:**
+1. Make sure you copied Sean's ENTIRE token (starts with "hf_")
+2. Re-run: `huggingface-cli login`
+3. Paste the token carefully (no extra spaces)
+4. Restart the application
+
+**Still not working?**
+- Ask Sean to verify the token is still valid
+- Check your internet connection
+- Try: `huggingface-cli whoami` to verify login
 
 ### "Out of memory"
 - Close other applications

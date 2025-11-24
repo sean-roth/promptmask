@@ -64,12 +64,11 @@ source venv/bin/activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Authenticate with Hugging Face (one-time setup)
+# Authenticate with Hugging Face
+# Get Sean's HuggingFace token (starts with "hf_")
+# Sean has already secured SAM 3 access
 huggingface-cli login
-
-# Request access to SAM 3 model (one-time)
-# Visit: https://huggingface.co/facebook/sam3
-# Click "Request Access" and wait for approval (~24 hours)
+# Paste Sean's token when prompted
 
 # Launch the application
 python app.py

@@ -58,44 +58,53 @@ pip install torch torchvision
 
 ### 4. HuggingFace Authentication
 
-The SAM 3 model requires HuggingFace authentication to download.
+The SAM 3 model requires HuggingFace authentication to download. Sean has already secured access to SAM 3, so you just need to use his token.
 
-#### Option A: Using huggingface-cli (Recommended)
+#### Get Sean's HuggingFace Token
+
+**What the token looks like:**
+- Starts with "hf_"
+- About 40 characters long
+- Keep it secret (like a password)
+
+#### Login with the Token (Recommended Method)
 
 ```bash
 # Install HuggingFace CLI (included in requirements.txt)
 pip install huggingface-hub
 
-# Login with your HuggingFace token
+# Login with Sean's HuggingFace token
 huggingface-cli login
 ```
 
 When prompted:
-1. Enter your HuggingFace token
-   - Get your token at: https://huggingface.co/settings/tokens
-   - Create a token with "Read" permission
-2. Choose whether to add token to git credentials (optional)
+1. Paste Sean's HuggingFace token (starts with "hf_")
+2. Press Enter
+3. Choose whether to add token to git credentials (optional)
+4. You'll see "Login successful"
 
-#### Option B: Using Environment Variable
+#### Alternative: Using Environment Variable
 
 ```bash
 # Linux/Mac
-export HUGGING_FACE_HUB_TOKEN="your_token_here"
+export HUGGING_FACE_HUB_TOKEN="sean_token_here"
 
 # Windows (PowerShell)
-$env:HUGGING_FACE_HUB_TOKEN="your_token_here"
+$env:HUGGING_FACE_HUB_TOKEN="sean_token_here"
 
 # Windows (CMD)
-set HUGGING_FACE_HUB_TOKEN=your_token_here
+set HUGGING_FACE_HUB_TOKEN=sean_token_here
 ```
 
-#### Option C: Using Python
+#### Alternative: Using .env File
 
 Create a `.env` file in the project root:
 
 ```
-HUGGING_FACE_HUB_TOKEN=your_token_here
+HUGGING_FACE_HUB_TOKEN=sean_token_here
 ```
+
+**Note:** Sean has already secured access to Meta's SAM 3 model. You don't need to request access separately—just use the token Sean provides.
 
 ### 5. Verify Installation
 
@@ -164,12 +173,23 @@ On first run, the application will:
 
 **Error:** "401 Client Error: Unauthorized"
 
+This means the HuggingFace token isn't working.
+
 **Solution:**
+1. Make sure you copied Sean's ENTIRE token (starts with "hf_")
+2. Re-run the login command:
 ```bash
 # Re-login to HuggingFace
 huggingface-cli logout
 huggingface-cli login
 ```
+3. Paste the token carefully (no extra spaces)
+4. Restart the application
+
+**Still not working?**
+- Ask Sean to verify the token is still valid
+- Check your internet connection
+- Try: `huggingface-cli whoami` to verify login
 
 ### CUDA Out of Memory
 
