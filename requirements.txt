@@ -1,0 +1,13 @@
+gradio==4.44.0
+torch==2.3.0
+torchvision==0.18.0
+transformers==4.46.0
+huggingface-hub==0.24.0
+accelerate==0.34.0
+Pillow==10.4.0
+opencv-python==4.10.0
+ffmpeg-python==0.2.0
+numpy==1.26.4
+pathlib2==2.3.7
+tqdm==4.66.1
+scipy==1.11.4
