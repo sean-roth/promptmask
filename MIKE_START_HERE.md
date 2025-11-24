@@ -73,8 +73,6 @@ pip install -r requirements.txt
 
 ### Step 4: Add HuggingFace Token
 
-Sean will text you a token that looks like: `hf_AbCdEfGhIjKlMnOpQrStUvWxYz1234567890`
-
 **Create the .env file:**
 
 **On Mac:**
@@ -82,32 +80,26 @@ Sean will text you a token that looks like: `hf_AbCdEfGhIjKlMnOpQrStUvWxYz123456
 # In the promptmask-main folder, create .env file
 nano .env
 
-# Type this (paste Sean's actual token):
-HUGGINGFACE_TOKEN=hf_xxxxx
+# Copy and paste this EXACT line:
+HUGGINGFACE_TOKEN=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
 
 # Press Ctrl+X, then Y, then Enter to save
 ```
 
 **On Windows:**
 ```bash
-# In the promptmask-main folder, create .env file
-notepad .env
-
-# Type this (paste Sean's actual token):
-HUGGINGFACE_TOKEN=hf_xxxxx
+# In the promptmask-main folder, right-click and create New → Text Document
+# Name it: .env (no .txt at the end!)
+# Open it with Notepad and paste this EXACT line:
+HUGGINGFACE_TOKEN=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
 
 # Click File → Save
 ```
 
-**What the token looks like:**
-- Starts with `hf_`
-- About 40 characters long
-- Keep it secret (like a password)
-
-**Example .env file contents:**
-```
-HUGGINGFACE_TOKEN=hf_AbCdEfGhIjKlMnOpQrStUvWxYz1234567890
-```
+**Important:**
+- Copy the line EXACTLY as shown above
+- Don't add spaces or extra lines
+- Make sure it's called `.env` not `.env.txt`
 
 That's it! You're ready to run the app.
 
@@ -200,15 +192,14 @@ After processing:
 
 ### "Missing HuggingFace token"
 - Make sure you created the `.env` file
-- Check that it contains: `HUGGINGFACE_TOKEN=hf_xxxxx`
-- Make sure you used Sean's actual token (starts with `hf_`)
-- The `.env` file should be in the `promptmask-main` folder
+- Check that it contains the EXACT line from Step 4
+- The `.env` file should be in the `promptmask-main` folder (same place as `app.py`)
 
 ### "Authentication failed" or "401 Unauthorized"
-- Check your `.env` file has the complete token
-- Make sure there are no extra spaces
-- Ask Sean to verify the token is still valid
+- Copy the token line EXACTLY from Step 4 (no spaces, no changes)
+- Make sure the file is named `.env` not `.env.txt`
 - Try deleting and recreating the `.env` file
+- Text Sean if still having issues
 
 ### "Model not loaded"
 - Click the "Load SAM 3 Model" button first
@@ -222,6 +213,7 @@ After processing:
 
 ### Can't create .env file on Windows
 - Windows might try to call it `.env.txt`
+- Make sure "File name extensions" is visible in File Explorer
 - In Notepad: File → Save As → File name: `.env` → Save as type: "All Files"
 - Make sure it's `.env` not `.env.txt`
 
@@ -344,14 +336,14 @@ cat .env
 type .env
 ```
 
-Should show: `HUGGINGFACE_TOKEN=hf_xxxxx`
+Should show: `HUGGINGFACE_TOKEN=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`
 
 ---
 
 ## Summary
 
 ✅ **Setup once** (~15 min)
-✅ **Create .env file** with Sean's token
+✅ **Create .env file** with token (copy from Step 4)
 ✅ **Run app** (30 seconds after first time)
 ✅ **Process video** (~30 min per min of video)
 ✅ **Get Adobe-ready masks** instantly
