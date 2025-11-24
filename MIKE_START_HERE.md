@@ -71,19 +71,26 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### Step 4: Authenticate with HuggingFace
+### Step 4: Add HuggingFace Token
 
-Sean needs to give you his HuggingFace token. Once you have it:
+1. Create a file called `.env` in the `promptmask-main` folder
+2. Open it with Notepad (Windows) or TextEdit (Mac)
+3. Type this (use the token Sean gave you):
+   ```
+   HUGGINGFACE_TOKEN=hf_xxxxx
+   ```
+4. Save the file
+5. That's it!
 
-```bash
-# Install CLI
-pip install huggingface-cli
+**What the token looks like:**
+- Starts with `hf_`
+- About 40 characters long
+- Sean will text it to you
 
-# Login (paste Sean's token when asked)
-huggingface-cli login
+**Example .env file:**
 ```
-
-That's it! You're ready to run the app.
+HUGGINGFACE_TOKEN=hf_AbCdEfGhIjKlMnOpQrStUvWxYz1234567890
+```
 
 ---
 
@@ -176,10 +183,11 @@ After processing:
 - Click the "Load SAM 3 Model" button first
 - Wait for it to say "Model loaded successfully"
 
-### "Authentication failed"
-- Make sure you ran `huggingface-cli login`
-- Ask Sean for his HuggingFace token
-- Re-run the login command
+### "Authentication failed" or "Missing HuggingFace token"
+- Make sure you created the `.env` file
+- Check that it contains: `HUGGINGFACE_TOKEN=hf_xxxxx`
+- Make sure the `.env` file is in the `promptmask-main` folder (same folder as `app.py`)
+- Ask Sean for the token if you don't have it
 
 ### "Out of memory"
 - Close other applications

@@ -4,6 +4,7 @@ PromptMask - Video Segmentation Application
 Main Gradio application integrating SAM 3 model with full video processing pipeline.
 """
 
+import os
 import gradio as gr
 import numpy as np
 from PIL import Image
@@ -65,6 +66,16 @@ class PromptMaskApp:
             Status message
         """
         try:
+            # Check if token exists
+            if not os.getenv('HUGGINGFACE_TOKEN'):
+                return (
+                    "❌ Missing HuggingFace token\n\n"
+                    "Please create a .env file with:\n"
+                    "HUGGINGFACE_TOKEN=hf_xxxxx\n\n"
+                    "Ask Sean for the token if you don't have it.\n"
+                    "See MIKE_START_HERE.md for detailed instructions."
+                )
+
             logger.info("Loading SAM 3 model...")
             model, processor = self.model_loader.load_model()
             self.inference_engine = SAM3Inference(self.model_loader)
@@ -394,7 +405,7 @@ def create_ui(app: PromptMaskApp) -> gr.Blocks:
         gr.Markdown("""
         ### 📋 Notes
         - First run will download the SAM 3 model (~2GB)
-        - HuggingFace authentication required (see INSTALLATION.md)
+        - HuggingFace token required (create .env file - see MIKE_START_HERE.md)
         - Supports MP4, AVI, MOV, MKV, WebM formats
         - Maximum 300 frames per video
         - Processing time depends on video length and hardware
