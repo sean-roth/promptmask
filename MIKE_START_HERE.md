@@ -71,16 +71,42 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### Step 4: Authenticate with HuggingFace
+### Step 4: Add HuggingFace Token
 
-Sean needs to give you his HuggingFace token. Once you have it:
+Sean will text you a token that looks like: `hf_AbCdEfGhIjKlMnOpQrStUvWxYz1234567890`
 
+**Create the .env file:**
+
+**On Mac:**
 ```bash
-# Install CLI
-pip install huggingface-cli
+# In the promptmask-main folder, create .env file
+nano .env
 
-# Login (paste Sean's token when asked)
-huggingface-cli login
+# Type this (paste Sean's actual token):
+HUGGINGFACE_TOKEN=hf_xxxxx
+
+# Press Ctrl+X, then Y, then Enter to save
+```
+
+**On Windows:**
+```bash
+# In the promptmask-main folder, create .env file
+notepad .env
+
+# Type this (paste Sean's actual token):
+HUGGINGFACE_TOKEN=hf_xxxxx
+
+# Click File → Save
+```
+
+**What the token looks like:**
+- Starts with `hf_`
+- About 40 characters long
+- Keep it secret (like a password)
+
+**Example .env file contents:**
+```
+HUGGINGFACE_TOKEN=hf_AbCdEfGhIjKlMnOpQrStUvWxYz1234567890
 ```
 
 That's it! You're ready to run the app.
@@ -172,14 +198,32 @@ After processing:
 
 ## Troubleshooting
 
+### "Missing HuggingFace token"
+- Make sure you created the `.env` file
+- Check that it contains: `HUGGINGFACE_TOKEN=hf_xxxxx`
+- Make sure you used Sean's actual token (starts with `hf_`)
+- The `.env` file should be in the `promptmask-main` folder
+
+### "Authentication failed" or "401 Unauthorized"
+- Check your `.env` file has the complete token
+- Make sure there are no extra spaces
+- Ask Sean to verify the token is still valid
+- Try deleting and recreating the `.env` file
+
 ### "Model not loaded"
 - Click the "Load SAM 3 Model" button first
 - Wait for it to say "Model loaded successfully"
+- If it says authentication failed, check your `.env` file
 
-### "Authentication failed"
-- Make sure you ran `huggingface-cli login`
-- Ask Sean for his HuggingFace token
-- Re-run the login command
+### Can't find .env file on Mac
+- Mac hides files starting with `.` (dot)
+- In Terminal, run: `ls -la` to see hidden files
+- Or create it using: `nano .env` in Terminal
+
+### Can't create .env file on Windows
+- Windows might try to call it `.env.txt`
+- In Notepad: File → Save As → File name: `.env` → Save as type: "All Files"
+- Make sure it's `.env` not `.env.txt`
 
 ### "Out of memory"
 - Close other applications
@@ -252,6 +296,10 @@ After processing:
 
 ## Need Help?
 
+**Issues with .env file?**
+- Text Sean with a screenshot
+- Make sure you're in the right folder
+
 **Issues with setup?**
 - Text Sean with screenshot of error
 - Include what command you ran
@@ -284,15 +332,26 @@ Want to process multiple videos? Just repeat the process:
 3. Upload video 2
 4. Process again
 
-### Keyboard Shortcuts
+### Checking Your Token
 
-None yet, but coming soon!
+**On Mac/Linux:**
+```bash
+cat .env
+```
+
+**On Windows:**
+```bash
+type .env
+```
+
+Should show: `HUGGINGFACE_TOKEN=hf_xxxxx`
 
 ---
 
 ## Summary
 
 ✅ **Setup once** (~15 min)
+✅ **Create .env file** with Sean's token
 ✅ **Run app** (30 seconds after first time)
 ✅ **Process video** (~30 min per min of video)
 ✅ **Get Adobe-ready masks** instantly
