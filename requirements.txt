@@ -1,0 +1,22 @@
+# PromptMask Dependencies
+# Python 3.11+
+
+# UI Framework
+gradio==4.44.0
+
+# ML and AI
+torch==2.3.0
+torchvision==0.18.0
+huggingface-hub==0.24.0
+transformers==4.44.0
+
+# Image and Video Processing
+Pillow==10.4.0
+opencv-python==4.10.0
+ffmpeg-python==0.2.0
+numpy==1.26.4
+
+# Utilities
+pathlib2==2.3.7
+tqdm==4.66.1
+scipy==1.11.4
