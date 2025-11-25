@@ -1,6 +1,6 @@
 # 🎬 PromptMask - Quick Start for Mike
 
-**Welcome Mike!** This guide will get you up and running in ~15 minutes.
+**Welcome Mike!** This guide will get you up and running in ~20 minutes.
 
 ## What This Tool Does
 
@@ -10,7 +10,7 @@ Replaces 3-4 hours of manual work with 30 minutes of automated processing.
 
 ---
 
-## Setup (One-Time, ~10 minutes)
+## Setup (One-Time, ~15 minutes)
 
 ### Step 1: Download the Code
 
@@ -33,13 +33,28 @@ Replaces 3-4 hours of manual work with 30 minutes of automated processing.
 brew install python@3.11
 ```
 
-**On Windows:**
-1. Go to: https://www.python.org/downloads/
-2. Download Python 3.11
-3. Run installer, **check "Add Python to PATH"**
-4. Click Install
+### Step 3: Request Access to SAM 3 Model
 
-### Step 3: Install Dependencies
+**⚠️ IMPORTANT: Do this BEFORE installing!**
+
+SAM 3 is a "gated" model - you need to request access:
+
+1. Go to: https://huggingface.co/facebook/sam3
+2. Click **"Access repository"** (you'll need a free HuggingFace account)
+3. Accept the terms
+4. Access is usually approved instantly!
+
+### Step 4: Get Your HuggingFace Token
+
+1. Go to: https://huggingface.co/settings/tokens
+2. Click **"Create new token"**
+3. Name it anything (e.g., "PromptMask")
+4. Set type to **"Read"**
+5. Click **"Create"**
+6. **Copy the token** (starts with `hf_...`)
+7. Keep this page open - you'll need the token in Step 6
+
+### Step 5: Install Dependencies
 
 **On Mac:**
 ```bash
@@ -52,26 +67,11 @@ python3 -m venv venv
 # Activate it
 source venv/bin/activate
 
-# Install packages (takes 5-10 minutes)
+# Install packages (takes 10-15 minutes - SAM 3 needs latest transformers)
 pip install -r requirements.txt
 ```
 
-**On Windows:**
-```bash
-# Open Command Prompt
-cd C:\Users\YourName\Desktop\promptmask-main
-
-# Create virtual environment
-python -m venv venv
-
-# Activate it
-venv\Scripts\activate
-
-# Install packages (takes 5-10 minutes)
-pip install -r requirements.txt
-```
-
-### Step 4: Add HuggingFace Token
+### Step 6: Add Your HuggingFace Token
 
 **Create the .env file:**
 
@@ -80,24 +80,19 @@ pip install -r requirements.txt
 # In the promptmask-main folder, create .env file
 nano .env
 
-# Copy and paste this EXACT line:
-HUGGINGFACE_TOKEN=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
+# Paste this line, replacing YOUR_TOKEN_HERE with your actual token:
+HUGGINGFACE_TOKEN=YOUR_TOKEN_HERE
 
 # Press Ctrl+X, then Y, then Enter to save
 ```
 
-**On Windows:**
-```bash
-# In the promptmask-main folder, right-click and create New → Text Document
-# Name it: .env (no .txt at the end!)
-# Open it with Notepad and paste this EXACT line:
-HUGGINGFACE_TOKEN=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
-
-# Click File → Save
+Example (your token will be different):
+```
+HUGGINGFACE_TOKEN=hf_abcdefghijklmnopqrstuvwxyz123456
 ```
 
 **Important:**
-- Copy the line EXACTLY as shown above
+- Use YOUR OWN token from Step 4
 - Don't add spaces or extra lines
 - Make sure it's called `.env` not `.env.txt`
 
@@ -114,18 +109,6 @@ cd ~/Desktop/promptmask-main
 
 # Activate virtual environment
 source venv/bin/activate
-
-# Run the app
-python app.py
-```
-
-### On Windows:
-```bash
-# Open Command Prompt
-cd C:\Users\YourName\Desktop\promptmask-main
-
-# Activate virtual environment
-venv\Scripts\activate
 
 # Run the app
 python app.py
@@ -190,41 +173,36 @@ After processing:
 
 ## Troubleshooting
 
-### "Missing HuggingFace token"
-- Make sure you created the `.env` file
-- Check that it contains the EXACT line from Step 4
-- The `.env` file should be in the `promptmask-main` folder (same place as `app.py`)
+### "Access denied" or "gated model" error
+- Go to https://huggingface.co/facebook/sam3
+- Click "Access repository" and accept terms
+- Wait a few seconds and try again
 
 ### "Authentication failed" or "401 Unauthorized"
-- Copy the token line EXACTLY from Step 4 (no spaces, no changes)
-- Make sure the file is named `.env` not `.env.txt`
-- Try deleting and recreating the `.env` file
-- Text Sean if still having issues
+- Make sure you got YOUR OWN token from https://huggingface.co/settings/tokens
+- The token should start with `hf_`
+- Check your .env file has the token with no extra spaces
+- Try creating a new token if the old one doesn't work
 
 ### "Model not loaded"
 - Click the "Load SAM 3 Model" button first
 - Wait for it to say "Model loaded successfully"
-- If it says authentication failed, check your `.env` file
+- If it says authentication failed, check your token
+
+### "ImportError: cannot import Sam3Model"
+- The transformers library needs to be installed from source
+- Run: `pip install git+https://github.com/huggingface/transformers.git`
+- Or just run `pip install -r requirements.txt` again
 
 ### Can't find .env file on Mac
 - Mac hides files starting with `.` (dot)
 - In Terminal, run: `ls -la` to see hidden files
 - Or create it using: `nano .env` in Terminal
 
-### Can't create .env file on Windows
-- Windows might try to call it `.env.txt`
-- Make sure "File name extensions" is visible in File Explorer
-- In Notepad: File → Save As → File name: `.env` → Save as type: "All Files"
-- Make sure it's `.env` not `.env.txt`
-
 ### "Out of memory"
 - Close other applications
 - Try a shorter video (under 30 seconds)
 - Restart the app
-
-### "Can't find python command"
-**Mac:** Use `python3` instead of `python`
-**Windows:** Make sure you checked "Add to PATH" during install
 
 ### App won't start
 - Make sure virtual environment is activated
@@ -234,7 +212,7 @@ After processing:
 ### Processing takes forever
 - Normal! SAM 3 is processing each frame
 - Expect ~30 minutes per minute of video on Mac
-- ~15-20 minutes on Windows with good GPU
+- M3 Pro/Max will be faster
 
 ---
 
@@ -242,29 +220,24 @@ After processing:
 
 ### Minimum
 - 16GB RAM
-- Any recent Mac or Windows PC
+- Any M1/M2/M3 Mac
 - 20GB free disk space
 
 ### Recommended  
 - 24GB+ RAM
-- M3 Pro/Max Mac or NVIDIA GPU
+- M3 Pro/Max Mac
 - 50GB free disk space
 
-### What to Expect
+### What to Expect (MacBook 2024)
 
-**M3 Pro Mac:**
-- First run: 10 min download + processing
-- Processing: ~30 min per minute of video
+**M3 Pro/Max:**
+- First run: 10 min download
+- Processing: ~20-30 min per minute of video
 - Quality: Excellent
 
-**Windows with NVIDIA GPU:**
-- First run: 10 min download + processing
-- Processing: ~15-20 min per minute of video
-- Quality: Excellent
-
-**CPU only (no GPU):**
-- Processing: 2-3 hours per minute of video
-- Not recommended for regular use
+**M3 Base:**
+- Processing: ~30-40 min per minute of video
+- Quality: Excellent (just slower)
 
 ---
 
@@ -272,7 +245,7 @@ After processing:
 
 **Let's say you have a 30-second product demo video:**
 
-1. Start app → Load model (30 seconds)
+1. Start app → Load model (30 seconds after first time)
 2. Upload video
 3. Type prompt: "product on table"
 4. Click "Product Demo" preset
@@ -288,9 +261,9 @@ After processing:
 
 ## Need Help?
 
-**Issues with .env file?**
+**Issues with access or tokens?**
 - Text Sean with a screenshot
-- Make sure you're in the right folder
+- Make sure you completed Step 3 (request access) AND Step 4 (get token)
 
 **Issues with setup?**
 - Text Sean with screenshot of error
@@ -316,34 +289,22 @@ After processing:
 3. **Enable temporal smoothing**: Reduces flicker between frames
 4. **Increase feather**: Makes edges softer/more natural
 
-### Batch Processing
-
-Want to process multiple videos? Just repeat the process:
-1. Process video 1
-2. Download results
-3. Upload video 2
-4. Process again
-
 ### Checking Your Token
 
-**On Mac/Linux:**
 ```bash
 cat .env
 ```
 
-**On Windows:**
-```bash
-type .env
-```
-
-Should show: `HUGGINGFACE_TOKEN=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`
+Should show: `HUGGINGFACE_TOKEN=hf_...` (your token)
 
 ---
 
 ## Summary
 
+✅ **Request access** to SAM 3 model (Step 3)
+✅ **Get your token** from HuggingFace (Step 4)
 ✅ **Setup once** (~15 min)
-✅ **Create .env file** with token (copy from Step 4)
+✅ **Create .env file** with YOUR token (Step 6)
 ✅ **Run app** (30 seconds after first time)
 ✅ **Process video** (~30 min per min of video)
 ✅ **Get Adobe-ready masks** instantly
