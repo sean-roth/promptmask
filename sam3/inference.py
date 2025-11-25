@@ -39,6 +39,11 @@ class SAM3Inference:
         self.model = model_loader.get_model()
         self.processor = model_loader.get_processor()
         self.device = model_loader.device
+        
+        # Get model dtype for input conversion
+        # SAM 3 model uses bfloat16 on CUDA for efficiency
+        self.model_dtype = next(self.model.parameters()).dtype
+        logger.info(f"Model dtype: {self.model_dtype}")
 
     def segment_image(
         self,
@@ -78,13 +83,17 @@ class SAM3Inference:
                 return_tensors="pt"
             ).to(self.device)
 
+            # CRITICAL: Convert pixel_values to model's dtype (bfloat16)
+            # The processor outputs float32, but model weights are bfloat16
+            if 'pixel_values' in inputs:
+                inputs['pixel_values'] = inputs['pixel_values'].to(dtype=self.model_dtype)
+                logger.info(f"[DEBUG] Converted pixel_values to {self.model_dtype}")
+
             # Debug: Log input keys and shapes
-            logger.info(f"[DEBUG] Input keys: {inputs.keys()}")
+            logger.info(f"[DEBUG] Input keys: {list(inputs.keys())}")
             for key, val in inputs.items():
                 if torch.is_tensor(val):
                     logger.info(f"[DEBUG] inputs['{key}']: shape={val.shape}, dtype={val.dtype}")
-                else:
-                    logger.info(f"[DEBUG] inputs['{key}']: {type(val)}")
 
             # Run inference
             with torch.no_grad():
