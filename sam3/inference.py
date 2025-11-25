@@ -150,10 +150,11 @@ class SAM3Inference:
             logger.info(f"[DEBUG] Found {len(masks)} masks, scores: {scores}")
             
             # Convert to numpy if tensor
+            # CRITICAL: Must cast to float32 first - numpy doesn't support bfloat16
             if torch.is_tensor(masks):
-                masks = masks.cpu().numpy()
+                masks = masks.float().cpu().numpy()
             if torch.is_tensor(scores):
-                scores = scores.cpu().numpy()
+                scores = scores.float().cpu().numpy()
 
             # Combine all masks above threshold into one
             # (SAM 3 can return multiple instances)
