@@ -1,9 +1,16 @@
 # PromptMask Requirements
 # Production-ready video segmentation with SAM 3
 
+# Pin huggingface_hub FIRST to a version compatible with Gradio
+# (newer versions removed HfFolder which Gradio still needs)
+huggingface-hub>=0.19.0,<0.25.0
+
+# UI Framework (must come before transformers to lock huggingface_hub)
+gradio>=4.0.0,<5.0.0
+
 # Core ML Dependencies
 # NOTE: SAM 3 requires transformers from main branch (not yet in stable release)
-# This installs the latest development version with SAM 3 support
+# Install after huggingface_hub is pinned
 git+https://github.com/huggingface/transformers.git
 
 torch>=2.0.0
@@ -15,11 +22,7 @@ pillow>=10.0.0
 numpy>=1.24.0
 scipy>=1.11.0
 
-# UI Framework
-gradio>=4.0.0
-
 # Utilities
-huggingface-hub>=0.19.0
 tqdm>=4.65.0
 python-dotenv>=1.0.0
 
