@@ -1,6 +1,6 @@
 # 🎬 PromptMask - Quick Start for Mike
 
-**Welcome Mike!** This guide will get you up and running in ~20 minutes.
+**Welcome Mike!** This guide will get you up and running in ~15 minutes.
 
 ## What This Tool Does
 
@@ -33,28 +33,7 @@ Replaces 3-4 hours of manual work with 30 minutes of automated processing.
 brew install python@3.11
 ```
 
-### Step 3: Request Access to SAM 3 Model
-
-**⚠️ IMPORTANT: Do this BEFORE installing!**
-
-SAM 3 is a "gated" model - you need to request access:
-
-1. Go to: https://huggingface.co/facebook/sam3
-2. Click **"Access repository"** (you'll need a free HuggingFace account)
-3. Accept the terms
-4. Access is usually approved instantly!
-
-### Step 4: Get Your HuggingFace Token
-
-1. Go to: https://huggingface.co/settings/tokens
-2. Click **"Create new token"**
-3. Name it anything (e.g., "PromptMask")
-4. Set type to **"Read"**
-5. Click **"Create"**
-6. **Copy the token** (starts with `hf_...`)
-7. Keep this page open - you'll need the token in Step 6
-
-### Step 5: Install Dependencies
+### Step 3: Install Dependencies
 
 **On Mac:**
 ```bash
@@ -67,11 +46,11 @@ python3 -m venv venv
 # Activate it
 source venv/bin/activate
 
-# Install packages (takes 10-15 minutes - SAM 3 needs latest transformers)
+# Install packages (takes 10-15 minutes first time)
 pip install -r requirements.txt
 ```
 
-### Step 6: Add Your HuggingFace Token
+### Step 4: Add HuggingFace Token
 
 **Create the .env file:**
 
@@ -80,19 +59,14 @@ pip install -r requirements.txt
 # In the promptmask-main folder, create .env file
 nano .env
 
-# Paste this line, replacing YOUR_TOKEN_HERE with your actual token:
-HUGGINGFACE_TOKEN=YOUR_TOKEN_HERE
+# Copy and paste this EXACT line:
+HUGGINGFACE_TOKEN=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
 
 # Press Ctrl+X, then Y, then Enter to save
 ```
 
-Example (your token will be different):
-```
-HUGGINGFACE_TOKEN=hf_abcdefghijklmnopqrstuvwxyz123456
-```
-
 **Important:**
-- Use YOUR OWN token from Step 4
+- Copy the line EXACTLY as shown above
 - Don't add spaces or extra lines
 - Make sure it's called `.env` not `.env.txt`
 
@@ -173,46 +147,55 @@ After processing:
 
 ## Troubleshooting
 
-### "Access denied" or "gated model" error
-- Go to https://huggingface.co/facebook/sam3
-- Click "Access repository" and accept terms
-- Wait a few seconds and try again
+### "Missing HuggingFace token"
+- Make sure you created the `.env` file
+- Check that it contains the EXACT line from Step 4
+- The `.env` file should be in the `promptmask-main` folder (same place as `app.py`)
 
 ### "Authentication failed" or "401 Unauthorized"
-- Make sure you got YOUR OWN token from https://huggingface.co/settings/tokens
-- The token should start with `hf_`
-- Check your .env file has the token with no extra spaces
-- Try creating a new token if the old one doesn't work
+- Copy the token line EXACTLY from Step 4 (no spaces, no changes)
+- Make sure the file is named `.env` not `.env.txt`
+- Try deleting and recreating the `.env` file
+- Text Sean if still having issues
 
 ### "Model not loaded"
 - Click the "Load SAM 3 Model" button first
 - Wait for it to say "Model loaded successfully"
-- If it says authentication failed, check your token
+- If it says authentication failed, check your `.env` file
 
 ### "ImportError: cannot import Sam3Model"
-- The transformers library needs to be installed from source
-- Run: `pip install git+https://github.com/huggingface/transformers.git`
-- Or just run `pip install -r requirements.txt` again
+- This means transformers needs to be reinstalled
+- Run: `pip install -r requirements.txt` again
+- This installs transformers from the latest source code
 
 ### Can't find .env file on Mac
 - Mac hides files starting with `.` (dot)
 - In Terminal, run: `ls -la` to see hidden files
 - Or create it using: `nano .env` in Terminal
 
+### Can't create .env file
+- In Terminal, navigate to the folder: `cd ~/Desktop/promptmask-main`
+- Create the file: `nano .env`
+- Paste the token line
+- Press Ctrl+X, then Y, then Enter
+
 ### "Out of memory"
 - Close other applications
 - Try a shorter video (under 30 seconds)
 - Restart the app
 
+### "Can't find python command"
+Use `python3` instead of `python`
+
 ### App won't start
 - Make sure virtual environment is activated
 - You should see `(venv)` in your terminal prompt
-- If not, run the activate command again
+- If not, run: `source venv/bin/activate`
 
 ### Processing takes forever
 - Normal! SAM 3 is processing each frame
 - Expect ~30 minutes per minute of video on Mac
-- M3 Pro/Max will be faster
+- ~15-20 minutes on M3 Pro/Max
 
 ---
 
@@ -228,14 +211,14 @@ After processing:
 - M3 Pro/Max Mac
 - 50GB free disk space
 
-### What to Expect (MacBook 2024)
+### What to Expect
 
-**M3 Pro/Max:**
-- First run: 10 min download
+**M3 Pro/Max Mac:**
+- First run: 10 min download + processing
 - Processing: ~20-30 min per minute of video
 - Quality: Excellent
 
-**M3 Base:**
+**M3 Base Mac:**
 - Processing: ~30-40 min per minute of video
 - Quality: Excellent (just slower)
 
@@ -261,9 +244,9 @@ After processing:
 
 ## Need Help?
 
-**Issues with access or tokens?**
+**Issues with .env file?**
 - Text Sean with a screenshot
-- Make sure you completed Step 3 (request access) AND Step 4 (get token)
+- Make sure you're in the right folder
 
 **Issues with setup?**
 - Text Sean with screenshot of error
@@ -289,22 +272,29 @@ After processing:
 3. **Enable temporal smoothing**: Reduces flicker between frames
 4. **Increase feather**: Makes edges softer/more natural
 
+### Batch Processing
+
+Want to process multiple videos? Just repeat the process:
+1. Process video 1
+2. Download results
+3. Upload video 2
+4. Process again
+
 ### Checking Your Token
 
+**On Mac:**
 ```bash
 cat .env
 ```
 
-Should show: `HUGGINGFACE_TOKEN=hf_...` (your token)
+Should show: `HUGGINGFACE_TOKEN=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`
 
 ---
 
 ## Summary
 
-✅ **Request access** to SAM 3 model (Step 3)
-✅ **Get your token** from HuggingFace (Step 4)
 ✅ **Setup once** (~15 min)
-✅ **Create .env file** with YOUR token (Step 6)
+✅ **Create .env file** with token (copy from Step 4)
 ✅ **Run app** (30 seconds after first time)
 ✅ **Process video** (~30 min per min of video)
 ✅ **Get Adobe-ready masks** instantly
