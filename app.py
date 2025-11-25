@@ -14,7 +14,14 @@ from PIL import Image
 from typing import Optional, Tuple, List
 import logging
 from pathlib import Path
-from dotenv import load_dotenv
+
+# Try to load .env for local development, but don't require it
+# (HuggingFace Spaces injects secrets as environment variables directly)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 from sam3.model_loader import SAM3ModelLoader
 from sam3.inference import SAM3Inference
@@ -23,9 +30,6 @@ from pipeline.validators import VideoValidator, ParameterValidator
 from processing.temporal_smoother import TemporalSmoother
 from processing.mask_refiner import MaskRefiner
 from export.universal import UniversalExporter
-
-# Load .env file early
-load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -73,24 +77,15 @@ class PromptMaskApp:
             Status message
         """
         try:
-            # Check for .env file first
-            if not os.path.exists('.env'):
-                return (
-                    "❌ Missing .env file\n\n"
-                    "Please create a .env file with your HuggingFace token:\n"
-                    "1. Create file named .env in the project folder\n"
-                    "2. Add this line: HUGGINGFACE_TOKEN=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\n\n"
-                    "See MIKE_START_HERE.md Step 4 for detailed instructions."
-                )
-            
-            # Check if token exists
+            # Check if token exists (works for both .env and HF Spaces secrets)
             token = os.getenv('HUGGINGFACE_TOKEN')
             if not token:
                 return (
-                    "❌ Missing HuggingFace token in .env file\n\n"
-                    "Please add this line to your .env file:\n"
-                    "HUGGINGFACE_TOKEN=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\n\n"
-                    "See MIKE_START_HERE.md Step 4 for detailed instructions."
+                    "❌ Missing HuggingFace token\n\n"
+                    "For local use:\n"
+                    "  Create a .env file with: HUGGINGFACE_TOKEN=your_token_here\n\n"
+                    "For HuggingFace Spaces:\n"
+                    "  Add HUGGINGFACE_TOKEN in Space Settings → Repository Secrets"
                 )
             
             # Validate token format
@@ -98,9 +93,7 @@ class PromptMaskApp:
                 return (
                     "❌ Invalid HuggingFace token format\n\n"
                     "Your token should start with 'hf_'\n"
-                    "Make sure you copied the EXACT line from Step 4:\n"
-                    "HUGGINGFACE_TOKEN=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\n\n"
-                    "See MIKE_START_HERE.md for instructions."
+                    "Get a token at: https://huggingface.co/settings/tokens"
                 )
             
             logger.info("Loading SAM 3 model...")
@@ -299,8 +292,6 @@ def create_ui(app: PromptMaskApp) -> gr.Blocks:
 
         Upload a video and describe what you want to segment using natural language.
         The app will process each frame and export production-ready masks.
-        
-        **First time?** See MIKE_START_HERE.md for setup instructions.
         """)
 
         with gr.Row():
@@ -442,7 +433,6 @@ def create_ui(app: PromptMaskApp) -> gr.Blocks:
         gr.Markdown("""
         ### 📋 Notes
         - First model load will download ~2GB (cached after that)
-        - Create .env file with token (see MIKE_START_HERE.md)
         - Supports MP4, AVI, MOV, MKV, WebM formats
         - Maximum 300 frames per video
         """)
