@@ -11,9 +11,15 @@ NOTE: SAM 3 was released Nov 19, 2025 and requires:
 
 import os
 import torch
-from dotenv import load_dotenv
 from typing import Optional, Tuple
 import logging
+
+# Try to load .env for local development (optional for HF Spaces)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 # SAM 3 specific imports - requires transformers from main branch
 try:
@@ -35,7 +41,7 @@ class SAM3ModelLoader:
     Features:
     - Automatic device detection (CUDA > MPS > CPU)
     - Local model caching
-    - .env file authentication
+    - Environment variable authentication (works with .env or HF Spaces secrets)
     - Proper error handling for authentication
     """
 
@@ -43,14 +49,19 @@ class SAM3ModelLoader:
     MODEL_ID = "facebook/sam3"
 
     def __init__(self):
-        # Load environment variables from .env file
-        load_dotenv()
+        # Get token from environment (works for both .env and HF Spaces secrets)
         self.hf_token = os.getenv('HUGGINGFACE_TOKEN')
         
         self.device = self._detect_device()
         self.model = None
         self.processor = None
         logger.info(f"Initialized SAM3ModelLoader with device: {self.device}")
+        
+        # Log token status (not the actual token!)
+        if self.hf_token:
+            logger.info(f"HuggingFace token found (starts with: {self.hf_token[:10]}...)")
+        else:
+            logger.warning("No HUGGINGFACE_TOKEN found in environment")
 
     def _detect_device(self) -> str:
         """
@@ -82,6 +93,16 @@ class SAM3ModelLoader:
         """
         if model_id is None:
             model_id = self.MODEL_ID
+
+        # Check for token before attempting to load
+        if not self.hf_token:
+            raise ValueError(
+                "No HUGGINGFACE_TOKEN found.\n\n"
+                "For HuggingFace Spaces:\n"
+                "  Add HUGGINGFACE_TOKEN in Settings → Repository Secrets\n\n"
+                "For local use:\n"
+                "  Create a .env file with: HUGGINGFACE_TOKEN=your_token_here"
+            )
 
         try:
             logger.info(f"Loading model: {model_id}")
@@ -118,9 +139,9 @@ class SAM3ModelLoader:
                     "Authentication failed. Please check:\n"
                     "1. You have requested access at: https://huggingface.co/facebook/sam3\n"
                     "2. Your access request has been approved\n"
-                    "3. Your .env file contains: HUGGINGFACE_TOKEN=your_token_here\n"
-                    "4. Get your token from: https://huggingface.co/settings/tokens\n\n"
-                    "See MIKE_START_HERE.md for detailed instructions."
+                    "3. Your token is set correctly (HUGGINGFACE_TOKEN)\n"
+                    "4. Your token has 'read' permissions\n\n"
+                    "Get a token from: https://huggingface.co/settings/tokens"
                 ) from e
             if "403" in str(e) or "access" in error_str or "gated" in error_str:
                 raise ValueError(
@@ -129,8 +150,7 @@ class SAM3ModelLoader:
                     "1. Go to https://huggingface.co/facebook/sam3\n"
                     "2. Click 'Access repository' and accept terms\n"
                     "3. Wait for approval (usually instant)\n"
-                    "4. Try again\n\n"
-                    "See MIKE_START_HERE.md for detailed instructions."
+                    "4. Try again"
                 ) from e
             raise RuntimeError(f"Failed to load model: {e}") from e
         except Exception as e:
