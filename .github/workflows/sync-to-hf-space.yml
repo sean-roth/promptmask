@@ -20,5 +20,6 @@ jobs:
         uses: nateraw/huggingface-sync-action@v0.0.4
         with:
           hf_token: ${{ secrets.HF_TOKEN }}
-          hf_repo_id: sean-roth/promptmask
-          hf_repo_type: space
+          huggingface_repo_id: sean-roth/promptmask
+          repo_type: space
+          space_sdk: gradio
