@@ -286,9 +286,9 @@ def create_ui(app: PromptMaskApp) -> gr.Blocks:
     Returns:
         Gradio Blocks interface
     """
-    with gr.Blocks(title="PromptMask - Video Segmentation") as interface:
+    with gr.Blocks(title="VFX Buddy - PromptMask") as interface:
         gr.Markdown("""
-        # 🎬 PromptMask - Video Segmentation with SAM 3
+        # 🎬 VFX Buddy - PromptMask
 
         Upload a video and describe what you want to segment using natural language.
         The app will process each frame and export production-ready masks.
@@ -317,7 +317,7 @@ def create_ui(app: PromptMaskApp) -> gr.Blocks:
                 gr.Markdown("### 3️⃣ Describe What to Segment")
                 text_prompt = gr.Textbox(
                     label="Text Prompt",
-                    placeholder="e.g., 'person speaking' or 'product on table'",
+                    placeholder="e.g., 'person' or 'product on table'",
                     lines=2
                 )
 
@@ -424,7 +424,6 @@ def create_ui(app: PromptMaskApp) -> gr.Blocks:
         gr.Markdown("""
         ### 💡 Example Prompts
         - "person" - Segment people in the video
-        - "person speaking" - Segment the main speaker
         - "product on table" - Segment a product demo
         - "hand holding object" - Segment hands with objects
         - "yellow school bus" - SAM 3 understands descriptive phrases!
@@ -434,7 +433,7 @@ def create_ui(app: PromptMaskApp) -> gr.Blocks:
         ### 📋 Notes
         - First model load will download ~2GB (cached after that)
         - Supports MP4, AVI, MOV, MKV, WebM formats
-        - Maximum 300 frames per video
+        - Maximum 300 frames per video (~10 seconds at 30fps)
         """)
 
     return interface
@@ -448,11 +447,17 @@ def main():
     # Create UI
     interface = create_ui(app)
 
-    # Launch
+    # Launch with authentication
+    # Add users as (username, password) tuples
     interface.launch(
         server_name="0.0.0.0",
         server_port=7860,
-        share=False
+        share=False,
+        auth=[
+            ("mike", "thebuggalo"),
+            ("sean", "vfxbuddy2024"),
+        ],
+        auth_message="Welcome to VFX Buddy - PromptMask. Please log in."
     )
 
 
