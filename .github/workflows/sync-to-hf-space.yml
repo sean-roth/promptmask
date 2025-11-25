@@ -20,5 +20,5 @@ jobs:
         uses: nateraw/huggingface-sync-action@v0.0.4
         with:
           hf_token: ${{ secrets.HF_TOKEN }}
-          hf_repo_id: seanroth/promptmask
+          hf_repo_id: sean-roth/promptmask
           hf_repo_type: space
