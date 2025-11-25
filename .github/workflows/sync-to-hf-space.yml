@@ -1,0 +1,24 @@
+name: Sync to Hugging Face Space
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allows manual trigger from GitHub UI
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for proper sync
+          lfs: true       # In case we add large files later
+
+      - name: Sync to Hugging Face Space
+        uses: nateraw/huggingface-sync-action@v0.0.4
+        with:
+          hf_token: ${{ secrets.HF_TOKEN }}
+          hf_repo_id: seanroth/promptmask
+          hf_repo_type: space
