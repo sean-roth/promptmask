@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:  # Allows manual trigger from GitHub UI
+  workflow_dispatch:
 
 jobs:
   sync:
@@ -13,13 +13,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Full history for proper sync
-          lfs: true       # In case we add large files later
+          fetch-depth: 0
+          lfs: true
 
-      - name: Sync to Hugging Face Space
-        uses: nateraw/huggingface-sync-action@v0.0.4
-        with:
-          hf_token: ${{ secrets.HF_TOKEN }}
-          huggingface_repo_id: sean-roth/promptmask
-          repo_type: space
-          space_sdk: gradio
+      - name: Push to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git remote add hf https://sean-roth:${HF_TOKEN}@huggingface.co/spaces/sean-roth/promptmask
+          git push hf main --force
