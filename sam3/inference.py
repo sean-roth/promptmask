@@ -64,6 +64,12 @@ class SAM3Inference:
         try:
             # Get original image size
             original_size = image.size  # (width, height)
+            logger.info(f"[DEBUG] Image size: {original_size}, mode: {image.mode}")
+            
+            # Ensure RGB
+            if image.mode != 'RGB':
+                image = image.convert('RGB')
+                logger.info(f"[DEBUG] Converted to RGB")
             
             # Prepare inputs using SAM 3 processor
             inputs = self.processor(
@@ -72,13 +78,39 @@ class SAM3Inference:
                 return_tensors="pt"
             ).to(self.device)
 
+            # Debug: Log input keys and shapes
+            logger.info(f"[DEBUG] Input keys: {inputs.keys()}")
+            for key, val in inputs.items():
+                if torch.is_tensor(val):
+                    logger.info(f"[DEBUG] inputs['{key}']: shape={val.shape}, dtype={val.dtype}")
+                else:
+                    logger.info(f"[DEBUG] inputs['{key}']: {type(val)}")
+
             # Run inference
             with torch.no_grad():
                 outputs = self.model(**inputs)
 
+            # Debug: Log output attributes
+            logger.info(f"[DEBUG] Output type: {type(outputs)}")
+            if hasattr(outputs, 'pred_masks'):
+                logger.info(f"[DEBUG] pred_masks shape: {outputs.pred_masks.shape}")
+                logger.info(f"[DEBUG] pred_masks min/max: {outputs.pred_masks.min():.4f} / {outputs.pred_masks.max():.4f}")
+            if hasattr(outputs, 'pred_boxes'):
+                logger.info(f"[DEBUG] pred_boxes shape: {outputs.pred_boxes.shape}")
+            if hasattr(outputs, 'pred_logits'):
+                logger.info(f"[DEBUG] pred_logits shape: {outputs.pred_logits.shape}")
+                logger.info(f"[DEBUG] pred_logits min/max: {outputs.pred_logits.min():.4f} / {outputs.pred_logits.max():.4f}")
+            if hasattr(outputs, 'scores'):
+                logger.info(f"[DEBUG] scores: {outputs.scores}")
+
             # Post-process using SAM 3's instance segmentation
-            # Get the original sizes for proper mask resizing
-            target_sizes = [list(reversed(original_size))]  # (height, width)
+            # Use original_sizes from processor if available (per official docs)
+            if hasattr(inputs, 'original_sizes') and inputs.original_sizes is not None:
+                target_sizes = inputs.original_sizes.tolist()
+                logger.info(f"[DEBUG] Using processor original_sizes: {target_sizes}")
+            else:
+                target_sizes = [[original_size[1], original_size[0]]]  # (height, width)
+                logger.info(f"[DEBUG] Using manual target_sizes: {target_sizes}")
             
             results = self.processor.post_process_instance_segmentation(
                 outputs,
@@ -87,6 +119,17 @@ class SAM3Inference:
                 target_sizes=target_sizes
             )[0]
 
+            # Debug: Log results
+            logger.info(f"[DEBUG] Results keys: {results.keys() if isinstance(results, dict) else 'not a dict'}")
+            if isinstance(results, dict):
+                for key, val in results.items():
+                    if torch.is_tensor(val):
+                        logger.info(f"[DEBUG] results['{key}']: shape={val.shape}")
+                    elif isinstance(val, (list, np.ndarray)):
+                        logger.info(f"[DEBUG] results['{key}']: len={len(val)}")
+                    else:
+                        logger.info(f"[DEBUG] results['{key}']: {val}")
+
             # Extract masks and scores
             if len(results.get('masks', [])) == 0:
                 logger.warning(f"No masks found for prompt: '{text_prompt}'")
@@ -94,6 +137,8 @@ class SAM3Inference:
 
             masks = results['masks']
             scores = results['scores']
+            
+            logger.info(f"[DEBUG] Found {len(masks)} masks, scores: {scores}")
             
             # Convert to numpy if tensor
             if torch.is_tensor(masks):
@@ -126,6 +171,8 @@ class SAM3Inference:
 
         except Exception as e:
             logger.error(f"Segmentation failed: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
             raise RuntimeError(f"Failed to segment image: {e}") from e
 
     def segment_frame_sequence(
