@@ -1,10 +1,13 @@
 # PromptMask Requirements
 # Production-ready video segmentation with SAM 3
 
-# Core ML Dependencies (Branch 2 - Correct SAM 3 Integration)
+# Core ML Dependencies
+# NOTE: SAM 3 requires transformers from main branch (not yet in stable release)
+# This installs the latest development version with SAM 3 support
+git+https://github.com/huggingface/transformers.git
+
 torch>=2.0.0
-transformers==4.46.0
-accelerate==0.34.0
+accelerate>=0.34.0
 
 # Computer Vision
 opencv-python>=4.8.0

@@ -10,7 +10,7 @@ Replaces 3-4 hours of manual work with 30 minutes of automated processing.
 
 ---
 
-## Setup (One-Time, ~10 minutes)
+## Setup (One-Time, ~15 minutes)
 
 ### Step 1: Download the Code
 
@@ -33,12 +33,6 @@ Replaces 3-4 hours of manual work with 30 minutes of automated processing.
 brew install python@3.11
 ```
 
-**On Windows:**
-1. Go to: https://www.python.org/downloads/
-2. Download Python 3.11
-3. Run installer, **check "Add Python to PATH"**
-4. Click Install
-
 ### Step 3: Install Dependencies
 
 **On Mac:**
@@ -52,22 +46,7 @@ python3 -m venv venv
 # Activate it
 source venv/bin/activate
 
-# Install packages (takes 5-10 minutes)
-pip install -r requirements.txt
-```
-
-**On Windows:**
-```bash
-# Open Command Prompt
-cd C:\Users\YourName\Desktop\promptmask-main
-
-# Create virtual environment
-python -m venv venv
-
-# Activate it
-venv\Scripts\activate
-
-# Install packages (takes 5-10 minutes)
+# Install packages (takes 10-15 minutes first time)
 pip install -r requirements.txt
 ```
 
@@ -84,16 +63,6 @@ nano .env
 HUGGINGFACE_TOKEN=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
 
 # Press Ctrl+X, then Y, then Enter to save
-```
-
-**On Windows:**
-```bash
-# In the promptmask-main folder, right-click and create New → Text Document
-# Name it: .env (no .txt at the end!)
-# Open it with Notepad and paste this EXACT line:
-HUGGINGFACE_TOKEN=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
-
-# Click File → Save
 ```
 
 **Important:**
@@ -114,18 +83,6 @@ cd ~/Desktop/promptmask-main
 
 # Activate virtual environment
 source venv/bin/activate
-
-# Run the app
-python app.py
-```
-
-### On Windows:
-```bash
-# Open Command Prompt
-cd C:\Users\YourName\Desktop\promptmask-main
-
-# Activate virtual environment
-venv\Scripts\activate
 
 # Run the app
 python app.py
@@ -206,16 +163,21 @@ After processing:
 - Wait for it to say "Model loaded successfully"
 - If it says authentication failed, check your `.env` file
 
+### "ImportError: cannot import Sam3Model"
+- This means transformers needs to be reinstalled
+- Run: `pip install -r requirements.txt` again
+- This installs transformers from the latest source code
+
 ### Can't find .env file on Mac
 - Mac hides files starting with `.` (dot)
 - In Terminal, run: `ls -la` to see hidden files
 - Or create it using: `nano .env` in Terminal
 
-### Can't create .env file on Windows
-- Windows might try to call it `.env.txt`
-- Make sure "File name extensions" is visible in File Explorer
-- In Notepad: File → Save As → File name: `.env` → Save as type: "All Files"
-- Make sure it's `.env` not `.env.txt`
+### Can't create .env file
+- In Terminal, navigate to the folder: `cd ~/Desktop/promptmask-main`
+- Create the file: `nano .env`
+- Paste the token line
+- Press Ctrl+X, then Y, then Enter
 
 ### "Out of memory"
 - Close other applications
@@ -223,18 +185,17 @@ After processing:
 - Restart the app
 
 ### "Can't find python command"
-**Mac:** Use `python3` instead of `python`
-**Windows:** Make sure you checked "Add to PATH" during install
+Use `python3` instead of `python`
 
 ### App won't start
 - Make sure virtual environment is activated
 - You should see `(venv)` in your terminal prompt
-- If not, run the activate command again
+- If not, run: `source venv/bin/activate`
 
 ### Processing takes forever
 - Normal! SAM 3 is processing each frame
 - Expect ~30 minutes per minute of video on Mac
-- ~15-20 minutes on Windows with good GPU
+- ~15-20 minutes on M3 Pro/Max
 
 ---
 
@@ -242,29 +203,24 @@ After processing:
 
 ### Minimum
 - 16GB RAM
-- Any recent Mac or Windows PC
+- Any M1/M2/M3 Mac
 - 20GB free disk space
 
 ### Recommended  
 - 24GB+ RAM
-- M3 Pro/Max Mac or NVIDIA GPU
+- M3 Pro/Max Mac
 - 50GB free disk space
 
 ### What to Expect
 
-**M3 Pro Mac:**
+**M3 Pro/Max Mac:**
 - First run: 10 min download + processing
-- Processing: ~30 min per minute of video
+- Processing: ~20-30 min per minute of video
 - Quality: Excellent
 
-**Windows with NVIDIA GPU:**
-- First run: 10 min download + processing
-- Processing: ~15-20 min per minute of video
-- Quality: Excellent
-
-**CPU only (no GPU):**
-- Processing: 2-3 hours per minute of video
-- Not recommended for regular use
+**M3 Base Mac:**
+- Processing: ~30-40 min per minute of video
+- Quality: Excellent (just slower)
 
 ---
 
@@ -272,7 +228,7 @@ After processing:
 
 **Let's say you have a 30-second product demo video:**
 
-1. Start app → Load model (30 seconds)
+1. Start app → Load model (30 seconds after first time)
 2. Upload video
 3. Type prompt: "product on table"
 4. Click "Product Demo" preset
@@ -326,14 +282,9 @@ Want to process multiple videos? Just repeat the process:
 
 ### Checking Your Token
 
-**On Mac/Linux:**
+**On Mac:**
 ```bash
 cat .env
-```
-
-**On Windows:**
-```bash
-type .env
 ```
 
 Should show: `HUGGINGFACE_TOKEN=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`

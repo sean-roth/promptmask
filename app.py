@@ -2,6 +2,9 @@
 PromptMask - Video Segmentation Application
 
 Main Gradio application integrating SAM 3 model with full video processing pipeline.
+
+NOTE: SAM 3 was released Nov 19, 2025 and requires:
+- transformers installed from main branch: pip install git+https://github.com/huggingface/transformers.git
 """
 
 import os
@@ -11,6 +14,7 @@ from PIL import Image
 from typing import Optional, Tuple, List
 import logging
 from pathlib import Path
+from dotenv import load_dotenv
 
 from sam3.model_loader import SAM3ModelLoader
 from sam3.inference import SAM3Inference
@@ -19,6 +23,9 @@ from pipeline.validators import VideoValidator, ParameterValidator
 from processing.temporal_smoother import TemporalSmoother
 from processing.mask_refiner import MaskRefiner
 from export.universal import UniversalExporter
+
+# Load .env file early
+load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -29,8 +36,8 @@ class PromptMaskApp:
     Main application class integrating all components.
 
     Combines:
-    - SAM 3 model loading and inference (Branch 2)
-    - Full video processing pipeline (Branch 1)
+    - SAM 3 model loading and inference
+    - Full video processing pipeline
     - Temporal smoothing and mask refinement
     - Universal PNG export
     """
@@ -77,12 +84,23 @@ class PromptMaskApp:
                 )
             
             # Check if token exists
-            if not os.getenv('HUGGINGFACE_TOKEN'):
+            token = os.getenv('HUGGINGFACE_TOKEN')
+            if not token:
                 return (
                     "❌ Missing HuggingFace token in .env file\n\n"
                     "Please add this line to your .env file:\n"
                     "HUGGINGFACE_TOKEN=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\n\n"
                     "See MIKE_START_HERE.md Step 4 for detailed instructions."
+                )
+            
+            # Validate token format
+            if not token.startswith('hf_'):
+                return (
+                    "❌ Invalid HuggingFace token format\n\n"
+                    "Your token should start with 'hf_'\n"
+                    "Make sure you copied the EXACT line from Step 4:\n"
+                    "HUGGINGFACE_TOKEN=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\n\n"
+                    "See MIKE_START_HERE.md for instructions."
                 )
             
             logger.info("Loading SAM 3 model...")
@@ -93,7 +111,13 @@ class PromptMaskApp:
             return f"✅ Model loaded successfully on {self.model_loader.device}"
 
         except ValueError as e:
-            return f"❌ Authentication Error:\n{str(e)}"
+            return f"❌ Authentication/Access Error:\n{str(e)}"
+        except ImportError as e:
+            return (
+                f"❌ Import Error:\n{str(e)}\n\n"
+                "SAM 3 requires transformers from main branch.\n"
+                "Run: pip install -r requirements.txt"
+            )
         except Exception as e:
             return f"❌ Error loading model:\n{str(e)}"
 
@@ -249,10 +273,11 @@ class PromptMaskApp:
         Returns:
             Tuple of (confidence_threshold, feather_radius, temporal_smoothing)
         """
+        # Adjusted thresholds for SAM 3 (works well with 0.5-0.7 range)
         presets = {
-            'speaker_isolation': (0.75, 8, True),
-            'product_demo': (0.70, 5, True),
-            'custom': (0.70, 5, False)
+            'speaker_isolation': (0.6, 8, True),
+            'product_demo': (0.5, 5, True),
+            'custom': (0.5, 5, False)
         }
 
         return presets.get(preset_name, presets['custom'])
@@ -274,6 +299,8 @@ def create_ui(app: PromptMaskApp) -> gr.Blocks:
 
         Upload a video and describe what you want to segment using natural language.
         The app will process each frame and export production-ready masks.
+        
+        **First time?** See MIKE_START_HERE.md for setup instructions.
         """)
 
         with gr.Row():
@@ -283,8 +310,9 @@ def create_ui(app: PromptMaskApp) -> gr.Blocks:
                 load_btn = gr.Button("🚀 Load SAM 3 Model", variant="primary")
                 model_status = gr.Textbox(
                     label="Model Status",
-                    value="Model not loaded",
-                    interactive=False
+                    value="Model not loaded - Click 'Load SAM 3 Model' to start",
+                    interactive=False,
+                    lines=4
                 )
 
                 # Video Input
@@ -314,10 +342,10 @@ def create_ui(app: PromptMaskApp) -> gr.Blocks:
                     confidence_threshold = gr.Slider(
                         minimum=0.0,
                         maximum=1.0,
-                        value=0.70,
+                        value=0.50,
                         step=0.05,
                         label="Confidence Threshold",
-                        info="Minimum confidence for segmentation"
+                        info="Minimum confidence for segmentation (0.5 recommended)"
                     )
 
                     feather_radius = gr.Slider(
@@ -408,16 +436,15 @@ def create_ui(app: PromptMaskApp) -> gr.Blocks:
         - "person speaking" - Segment the main speaker
         - "product on table" - Segment a product demo
         - "hand holding object" - Segment hands with objects
-        - "background" - Segment the background (invert for foreground removal)
+        - "yellow school bus" - SAM 3 understands descriptive phrases!
         """)
 
         gr.Markdown("""
         ### 📋 Notes
-        - First run will download the SAM 3 model (~2GB)
+        - First model load will download ~2GB (cached after that)
         - Create .env file with token (see MIKE_START_HERE.md)
         - Supports MP4, AVI, MOV, MKV, WebM formats
         - Maximum 300 frames per video
-        - Processing time depends on video length and hardware
         """)
 
     return interface

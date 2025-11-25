@@ -2,7 +2,10 @@
 SAM 3 Inference Engine
 
 Provides high-level inference API for text-prompted instance segmentation
-using the correct HuggingFace Transformers post-processing pipeline.
+using SAM 3's Promptable Concept Segmentation (PCS) capabilities.
+
+SAM 3 can segment all instances of an open-vocabulary concept specified
+by a short text phrase (e.g., "person", "yellow school bus").
 """
 
 import torch
@@ -21,8 +24,8 @@ class SAM3Inference:
     """
     High-level inference engine for SAM 3 segmentation.
 
-    Uses the correct Transformers API with post_process_instance_segmentation
-    for proper mask extraction and scoring.
+    Uses SAM 3's text-prompted Promptable Concept Segmentation (PCS)
+    to find and segment all matching instances.
     """
 
     def __init__(self, model_loader: SAM3ModelLoader):
@@ -41,15 +44,17 @@ class SAM3Inference:
         self,
         image: Image.Image,
         text_prompt: str,
-        confidence_threshold: float = 0.7
+        confidence_threshold: float = 0.5,
+        mask_threshold: float = 0.5
     ) -> Tuple[np.ndarray, float]:
         """
         Segment a single image using text prompt.
 
         Args:
             image: PIL Image to segment
-            text_prompt: Text description of object to segment
-            confidence_threshold: Minimum confidence score (0.0-1.0)
+            text_prompt: Text description of object to segment (e.g., "person")
+            confidence_threshold: Minimum confidence score for detection (0.0-1.0)
+            mask_threshold: Threshold for mask binarization (0.0-1.0)
 
         Returns:
             Tuple of (binary_mask, confidence_score)
@@ -57,7 +62,10 @@ class SAM3Inference:
             - confidence_score: float confidence of best match
         """
         try:
-            # Prepare inputs
+            # Get original image size
+            original_size = image.size  # (width, height)
+            
+            # Prepare inputs using SAM 3 processor
             inputs = self.processor(
                 images=image,
                 text=text_prompt,
@@ -68,37 +76,53 @@ class SAM3Inference:
             with torch.no_grad():
                 outputs = self.model(**inputs)
 
-            # Post-process using correct Transformers API
+            # Post-process using SAM 3's instance segmentation
+            # Get the original sizes for proper mask resizing
+            target_sizes = [list(reversed(original_size))]  # (height, width)
+            
             results = self.processor.post_process_instance_segmentation(
                 outputs,
-                target_sizes=[image.size[::-1]]  # (height, width)
+                threshold=confidence_threshold,
+                mask_threshold=mask_threshold,
+                target_sizes=target_sizes
             )[0]
 
-            # Extract best mask above threshold
-            if len(results['masks']) == 0:
-                logger.warning("No masks found")
-                return np.zeros(image.size[::-1], dtype=np.uint8), 0.0
+            # Extract masks and scores
+            if len(results.get('masks', [])) == 0:
+                logger.warning(f"No masks found for prompt: '{text_prompt}'")
+                return np.zeros((original_size[1], original_size[0]), dtype=np.uint8), 0.0
 
-            # Get scores and find best match
-            scores = results['scores'].cpu().numpy()
-            masks = results['masks'].cpu().numpy()
+            masks = results['masks']
+            scores = results['scores']
+            
+            # Convert to numpy if tensor
+            if torch.is_tensor(masks):
+                masks = masks.cpu().numpy()
+            if torch.is_tensor(scores):
+                scores = scores.cpu().numpy()
 
-            # Filter by confidence
-            valid_indices = scores >= confidence_threshold
-            if not valid_indices.any():
+            # Combine all masks above threshold into one
+            # (SAM 3 can return multiple instances)
+            combined_mask = np.zeros((original_size[1], original_size[0]), dtype=np.float32)
+            valid_scores = []
+            
+            for i, (mask, score) in enumerate(zip(masks, scores)):
+                if score >= confidence_threshold:
+                    combined_mask = np.maximum(combined_mask, mask.astype(np.float32))
+                    valid_scores.append(float(score))
+
+            if not valid_scores:
                 logger.warning(f"No masks above threshold {confidence_threshold}")
-                return np.zeros(image.size[::-1], dtype=np.uint8), 0.0
+                return np.zeros((original_size[1], original_size[0]), dtype=np.uint8), 0.0
 
-            # Get best mask
-            best_idx = scores.argmax()
-            best_score = float(scores[best_idx])
-            best_mask = masks[best_idx]
+            # Calculate average confidence
+            avg_score = np.mean(valid_scores)
 
             # Convert to binary mask (0/255)
-            binary_mask = (best_mask * 255).astype(np.uint8)
+            binary_mask = (combined_mask > mask_threshold).astype(np.uint8) * 255
 
-            logger.info(f"Segmented with confidence: {best_score:.3f}")
-            return binary_mask, best_score
+            logger.info(f"Segmented '{text_prompt}' with {len(valid_scores)} instances, avg confidence: {avg_score:.3f}")
+            return binary_mask, float(avg_score)
 
         except Exception as e:
             logger.error(f"Segmentation failed: {e}")
@@ -108,13 +132,11 @@ class SAM3Inference:
         self,
         frames: List[Image.Image],
         text_prompt: str,
-        confidence_threshold: float = 0.7,
+        confidence_threshold: float = 0.5,
         progress_callback: Optional[Callable[[int, int], None]] = None
     ) -> Tuple[List[np.ndarray], List[float]]:
         """
         Segment a sequence of video frames.
-
-        Uses the correct SAM 3 API from Branch 2 for each frame.
 
         Args:
             frames: List of PIL Images (video frames)
@@ -131,11 +153,10 @@ class SAM3Inference:
         scores = []
 
         total_frames = len(frames)
-        logger.info(f"Segmenting {total_frames} frames...")
+        logger.info(f"Segmenting {total_frames} frames with prompt: '{text_prompt}'")
 
         for i, frame in enumerate(frames):
             try:
-                # Use correct Branch 2 inference
                 mask, score = self.segment_image(
                     frame,
                     text_prompt,
@@ -161,13 +182,16 @@ class SAM3Inference:
                 scores.append(0.0)
 
         logger.info(f"Completed segmentation of {total_frames} frames")
+        avg_score = np.mean([s for s in scores if s > 0]) if any(s > 0 for s in scores) else 0.0
+        logger.info(f"Average confidence across all frames: {avg_score:.3f}")
+        
         return masks, scores
 
     def segment_batch(
         self,
         images: List[Image.Image],
         text_prompts: List[str],
-        confidence_threshold: float = 0.7
+        confidence_threshold: float = 0.5
     ) -> List[Tuple[np.ndarray, float]]:
         """
         Segment multiple images with different prompts.
