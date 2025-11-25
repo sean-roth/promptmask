@@ -5,8 +5,6 @@ Main Gradio application integrating SAM 3 model with full video processing pipel
 
 NOTE: SAM 3 was released Nov 19, 2025 and requires:
 - transformers installed from main branch: pip install git+https://github.com/huggingface/transformers.git
-- Access request approved at https://huggingface.co/facebook/sam3
-- Your own HuggingFace token from https://huggingface.co/settings/tokens
 """
 
 import os
@@ -81,9 +79,8 @@ class PromptMaskApp:
                     "❌ Missing .env file\n\n"
                     "Please create a .env file with your HuggingFace token:\n"
                     "1. Create file named .env in the project folder\n"
-                    "2. Add this line: HUGGINGFACE_TOKEN=hf_your_token_here\n"
-                    "3. Get your token from: https://huggingface.co/settings/tokens\n\n"
-                    "See MIKE_START_HERE.md Step 4-6 for detailed instructions."
+                    "2. Add this line: HUGGINGFACE_TOKEN=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\n\n"
+                    "See MIKE_START_HERE.md Step 4 for detailed instructions."
                 )
             
             # Check if token exists
@@ -91,10 +88,9 @@ class PromptMaskApp:
             if not token:
                 return (
                     "❌ Missing HuggingFace token in .env file\n\n"
-                    "Please add your token to the .env file:\n"
-                    "HUGGINGFACE_TOKEN=hf_your_token_here\n\n"
-                    "Get your token from: https://huggingface.co/settings/tokens\n"
-                    "See MIKE_START_HERE.md Step 4-6 for detailed instructions."
+                    "Please add this line to your .env file:\n"
+                    "HUGGINGFACE_TOKEN=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\n\n"
+                    "See MIKE_START_HERE.md Step 4 for detailed instructions."
                 )
             
             # Validate token format
@@ -102,9 +98,9 @@ class PromptMaskApp:
                 return (
                     "❌ Invalid HuggingFace token format\n\n"
                     "Your token should start with 'hf_'\n"
-                    "Current value doesn't look like a valid token.\n\n"
-                    "Get a new token from: https://huggingface.co/settings/tokens\n"
-                    "See MIKE_START_HERE.md Step 4 for instructions."
+                    "Make sure you copied the EXACT line from Step 4:\n"
+                    "HUGGINGFACE_TOKEN=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\n\n"
+                    "See MIKE_START_HERE.md for instructions."
                 )
             
             logger.info("Loading SAM 3 model...")
@@ -120,7 +116,7 @@ class PromptMaskApp:
             return (
                 f"❌ Import Error:\n{str(e)}\n\n"
                 "SAM 3 requires transformers from main branch.\n"
-                "Run: pip install git+https://github.com/huggingface/transformers.git"
+                "Run: pip install -r requirements.txt"
             )
         except Exception as e:
             return f"❌ Error loading model:\n{str(e)}"
@@ -445,9 +441,8 @@ def create_ui(app: PromptMaskApp) -> gr.Blocks:
 
         gr.Markdown("""
         ### 📋 Notes
-        - **First time setup:** Request access at https://huggingface.co/facebook/sam3
         - First model load will download ~2GB (cached after that)
-        - Create .env file with YOUR token (see MIKE_START_HERE.md)
+        - Create .env file with token (see MIKE_START_HERE.md)
         - Supports MP4, AVI, MOV, MKV, WebM formats
         - Maximum 300 frames per video
         """)
