@@ -22,7 +22,8 @@ class UniversalExporter:
 
     Features:
     - PNG sequence export
-    - Alpha channel export
+    - Grayscale matte export (Adobe-compatible)
+    - Alpha channel export (optional)
     - ZIP archive creation
     - Metadata preservation
     """
@@ -38,7 +39,7 @@ class UniversalExporter:
         format_type: str = 'universal_png',
         video_metadata: Optional[Dict] = None,
         create_archive: bool = True,
-        include_alpha: bool = True
+        include_alpha: bool = False  # Changed default to False for Adobe compatibility
     ) -> str:
         """
         Export masks to specified format.
@@ -49,7 +50,7 @@ class UniversalExporter:
             format_type: Export format ('universal_png', 'png_sequence', 'video')
             video_metadata: Optional video metadata dict
             create_archive: Whether to create ZIP archive
-            include_alpha: Whether to include alpha channel
+            include_alpha: If True, export RGBA with alpha. If False, export grayscale matte.
 
         Returns:
             Path to exported file or directory
@@ -88,12 +89,12 @@ class UniversalExporter:
             output_dir: Output directory
             metadata: Video metadata
             create_archive: Whether to create ZIP
-            include_alpha: Whether to include alpha channel
+            include_alpha: Whether to include alpha channel (False = grayscale matte)
 
         Returns:
             Path to output (directory or ZIP file)
         """
-        logger.info(f"Exporting {len(masks)} masks as universal PNG...")
+        logger.info(f"Exporting {len(masks)} masks as universal PNG (grayscale matte)...")
 
         # Create frames directory
         frames_dir = output_dir / "frames"
@@ -104,10 +105,10 @@ class UniversalExporter:
             frame_path = frames_dir / f"frame_{i:05d}.png"
 
             if include_alpha:
-                # Export as grayscale with alpha channel
+                # Export as RGBA with alpha channel
                 self._save_mask_with_alpha(mask, frame_path)
             else:
-                # Export as simple grayscale
+                # Export as grayscale matte (Adobe-compatible)
                 self._save_mask_simple(mask, frame_path)
 
         # Save metadata if provided
@@ -193,12 +194,22 @@ class UniversalExporter:
 
     def _save_mask_simple(self, mask: np.ndarray, path: Path):
         """
-        Save mask as simple grayscale PNG.
+        Save mask as simple grayscale PNG (Adobe-compatible matte).
+
+        White (255) = subject/foreground
+        Black (0) = background/transparent area
 
         Args:
             mask: Binary mask (0/255)
             path: Output file path
         """
+        # Ensure mask is uint8 with 0/255 values
+        if mask.dtype != np.uint8:
+            mask = mask.astype(np.uint8)
+        
+        # Ensure values are 0 or 255
+        mask = np.where(mask > 127, 255, 0).astype(np.uint8)
+        
         img = Image.fromarray(mask, mode='L')
         img.save(path, 'PNG', optimize=True)
 
@@ -206,12 +217,17 @@ class UniversalExporter:
         """
         Save mask as PNG with alpha channel.
 
+        Creates white image where mask alpha determines transparency.
+
         Args:
             mask: Binary mask (0/255)
             path: Output file path
         """
-        # Create RGBA image with mask as alpha
-        height, width = mask.shape
+        # Ensure mask is proper format
+        if mask.dtype != np.uint8:
+            mask = mask.astype(np.uint8)
+            
+        height, width = mask.shape[:2]
         rgba = np.zeros((height, width, 4), dtype=np.uint8)
 
         # Set RGB to white
@@ -325,7 +341,7 @@ class UniversalExporter:
             mask = masks[idx]
             frame = original_frames[idx]
 
-            # Convert mask to RGB
+            # Convert mask to RGB (white where mask is set)
             mask_rgb = np.stack([mask] * 3, axis=-1)
 
             # Concatenate horizontally
