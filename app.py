@@ -439,17 +439,12 @@ def main():
     # Create UI
     interface = create_ui(app)
 
-    # Launch with authentication
-    # Add users as (username, password) tuples
+    # Launch without auth - access controlled via HuggingFace Space visibility
+    # Set Space to private, make public only during demos
     interface.launch(
         server_name="0.0.0.0",
         server_port=7860,
-        share=False,
-        auth=[
-            ("mike", "vfxbuddy2025"),
-            ("sean", "vfxbuddy2024"),
-        ],
-        auth_message="Welcome to VFX Buddy. Please log in."
+        share=False
     )
 
 
