@@ -71,7 +71,7 @@ class PromptMaskApp:
 
     def load_model(self) -> str:
         """
-        Load SAM 3 model from HuggingFace.
+        Load model from HuggingFace.
 
         Returns:
             Status message
@@ -81,38 +81,31 @@ class PromptMaskApp:
             token = os.getenv('HUGGINGFACE_TOKEN')
             if not token:
                 return (
-                    "❌ Missing HuggingFace token\n\n"
-                    "For local use:\n"
-                    "  Create a .env file with: HUGGINGFACE_TOKEN=your_token_here\n\n"
-                    "For HuggingFace Spaces:\n"
-                    "  Add HUGGINGFACE_TOKEN in Space Settings → Repository Secrets"
+                    "❌ Configuration error. Please contact support."
                 )
             
             # Validate token format
             if not token.startswith('hf_'):
                 return (
-                    "❌ Invalid HuggingFace token format\n\n"
-                    "Your token should start with 'hf_'\n"
-                    "Get a token at: https://huggingface.co/settings/tokens"
+                    "❌ Configuration error. Please contact support."
                 )
             
-            logger.info("Loading SAM 3 model...")
+            logger.info("Loading model...")
             model, processor = self.model_loader.load_model()
             self.inference_engine = SAM3Inference(self.model_loader)
             self.model_loaded = True
 
-            return f"✅ Model loaded successfully on {self.model_loader.device}"
+            return f"✅ Model loaded successfully"
 
         except ValueError as e:
-            return f"❌ Authentication/Access Error:\n{str(e)}"
+            logger.error(f"Auth error: {e}")
+            return "❌ Model loading failed. Please contact support."
         except ImportError as e:
-            return (
-                f"❌ Import Error:\n{str(e)}\n\n"
-                "SAM 3 requires transformers from main branch.\n"
-                "Run: pip install -r requirements.txt"
-            )
+            logger.error(f"Import error: {e}")
+            return "❌ Model loading failed. Please contact support."
         except Exception as e:
-            return f"❌ Error loading model:\n{str(e)}"
+            logger.error(f"Error: {e}")
+            return "❌ Model loading failed. Please contact support."
 
     def process_video(
         self,
@@ -266,7 +259,6 @@ class PromptMaskApp:
         Returns:
             Tuple of (confidence_threshold, feather_radius, temporal_smoothing)
         """
-        # Adjusted thresholds for SAM 3 (works well with 0.5-0.7 range)
         presets = {
             'speaker_isolation': (0.6, 8, True),
             'product_demo': (0.5, 5, True),
@@ -298,12 +290,12 @@ def create_ui(app: PromptMaskApp) -> gr.Blocks:
             with gr.Column(scale=1):
                 # Model Loading
                 gr.Markdown("### 1️⃣ Load Model")
-                load_btn = gr.Button("🚀 Load SAM 3 Model", variant="primary")
+                load_btn = gr.Button("🚀 Load Model", variant="primary")
                 model_status = gr.Textbox(
                     label="Model Status",
-                    value="Model not loaded - Click 'Load SAM 3 Model' to start",
+                    value="Model not loaded - Click 'Load Model' to start",
                     interactive=False,
-                    lines=4
+                    lines=2
                 )
 
                 # Video Input
@@ -426,12 +418,12 @@ def create_ui(app: PromptMaskApp) -> gr.Blocks:
         - "person" - Segment people in the video
         - "product on table" - Segment a product demo
         - "hand holding object" - Segment hands with objects
-        - "yellow school bus" - SAM 3 understands descriptive phrases!
+        - "car" or "yellow school bus" - Descriptive phrases work great!
         """)
 
         gr.Markdown("""
         ### 📋 Notes
-        - First model load will download ~2GB (cached after that)
+        - First run will take a moment to initialize (cached after that)
         - Supports MP4, AVI, MOV, MKV, WebM formats
         - Maximum 300 frames per video (~10 seconds at 30fps)
         """)
@@ -457,7 +449,7 @@ def main():
             ("mike", "thebuggalo"),
             ("sean", "vfxbuddy2024"),
         ],
-        auth_message="Welcome to VFX Buddy - PromptMask. Please log in."
+        auth_message="Welcome to VFX Buddy. Please log in."
     )
 
 
