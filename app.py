@@ -446,7 +446,7 @@ def main():
         server_port=7860,
         share=False,
         auth=[
-            ("mike", "thebuggalo"),
+            ("mike", "vfxbuddy2025"),
             ("sean", "vfxbuddy2024"),
         ],
         auth_message="Welcome to VFX Buddy. Please log in."
